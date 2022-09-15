@@ -31,9 +31,11 @@
       ansible_python_interpreter: /usr/bin/python3  # fedora container doesn't ship python2
 
   - name: Run the role in the container
-    delegate_to: '{{ container_name }}'
     include_role:
       name: sample-nginx
+    args:
+      apply:
+          delegate_to: '{{ container_name }}'
 
   - block:
     - name: Change default command of the container image

@@ -3,15 +3,19 @@
   connection: local
   # gather_facts: false
   vars:
-    image: fedora:27
+    image: rockylinux:8
     container_name: build_container
     image_name: nginx
     container_engine: buildah  # or docker
   tasks:
-  - name: Obtain base image and create a container out of it
-    command: 'buildah from --name {{ container_name }} docker://{{ image }}'
+  - block:
+    - name: Obtain base image and create a container out of it
+      command: 'buildah from --name {{ container_name }} docker://{{ image }}'
+    - name: Install python
+      command: 'buildah run {{ container_name }} dnf -y install python3'
     become: true
     when: container_engine == 'buildah'
+
 
   - block:
     - name: Make the base image available locally
@@ -28,7 +32,7 @@
     add_host:
       hostname: '{{ container_name }}'
       ansible_connection: '{{ container_engine }}'
-      ansible_python_interpreter: /usr/bin/python3  # fedora container doesn't ship python2
+      ansible_python_interpreter: /usr/bin/python3  # rocky container doesn't ship python2
 
   - name: Run the role in the container
     include_role:
